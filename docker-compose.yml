@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  edeals.core:
+    image: e-deals.core
+    build:
+      context: .
+      dockerfile: src/EDeals.Core/Dockerfile
