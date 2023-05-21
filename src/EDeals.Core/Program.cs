@@ -1,10 +1,9 @@
+using EDeals.Core.API;
 using EDeals.Core.Application;
 using EDeals.Core.Infrastructure;
 using EDeals.Core.Infrastructure.Context;
-using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Seeders;
 using EDeals.Core.Infrastructure.Settings;
-using Microsoft.AspNet.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -19,10 +18,13 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    // Add configurations
+    ApiExtensions.AddApplicationSettings(builder);
+
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    
+
     // Add Services
     var dbSettings = builder.Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
 
