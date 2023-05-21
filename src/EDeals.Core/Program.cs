@@ -1,5 +1,11 @@
 using EDeals.Core.Application;
 using EDeals.Core.Infrastructure;
+using EDeals.Core.Infrastructure.Context;
+using EDeals.Core.Infrastructure.Identity.Auth;
+using EDeals.Core.Infrastructure.Seeders;
+using EDeals.Core.Infrastructure.Settings;
+using Microsoft.AspNet.Identity;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -9,22 +15,33 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    Log.Information("Starting application...");
+
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-
+    
     // Add Services
+    var dbSettings = builder.Configuration.GetSection(nameof(DbSettings)).Get<DbSettings>();
+
+    builder.Services.AddDbContext(dbSettings!);
+
     builder.Services
         .AddApplicationMethods()
-        .AddInfrastructureMethods();
+        .AddInfrastructureMethods()
+        .ConfigureSettings(builder.Configuration)
+        .AddCustomIdentity();
 
     // Add Logging
     builder.Host.UseSerilog((context, configuration) =>
         configuration.ReadFrom.Configuration(context.Configuration));
 
     var app = builder.Build();
+
+    RunMigrations(app);
+    await RunSeeders(app);
 
     if (app.Environment.IsDevelopment())
     {
@@ -50,4 +67,20 @@ finally
 {
     Log.Information("App shut down complete");
     Log.CloseAndFlush();
+}
+
+void RunMigrations(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+
+    var dataContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dataContext.Database.Migrate();
+}
+
+async Task RunSeeders(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+
+    var roleSeeders = scope.ServiceProvider.GetRequiredService<IdentityRoleSeeder>();
+    await roleSeeders.CreateRoles();
 }
