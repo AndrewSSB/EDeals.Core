@@ -34,7 +34,7 @@ namespace EDeals.Core.Infrastructure
 
         public static IServiceCollection AddInfrastructureMethods(this IServiceCollection services)
         {
-            services.AddTransient<IIdentityRepository, IdentityRepository>();
+            services.AddTransient<IIdentityBaseRepository, IdentityRepository>();
             services.AddScoped<IdentityRoleSeeder>();
 
             return services;

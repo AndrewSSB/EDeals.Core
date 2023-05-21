@@ -32,12 +32,12 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
             var userCreationResult = await _userManager.CreateAsync(user, password);
 
-            var assigningUserRoleResult = await _userManager.AddToRoleAsync(user, RoleNames.UserRole);
-
             if (userCreationResult is null)
             {
                 //...
             }
+            
+            var assigningUserRoleResult = await _userManager.AddToRoleAsync(user, RoleNames.UserRole);
 
             if (assigningUserRoleResult is null)
             {
@@ -49,7 +49,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             return null;
         }
 
-        public async Task<string?> SignInUserAsync(Guid? userId, string? email, string? username, string password)
+        public async Task<string?> SignInUserAsync(string password, Guid? userId = null, string? email = null, string? username = null)
         {
             var user = await GetUser(userId, email, username);
 
