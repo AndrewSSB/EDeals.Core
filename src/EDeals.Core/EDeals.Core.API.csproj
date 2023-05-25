@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EDeals.Core.Application\EDeals.Core.Application.csproj" />
     <ProjectReference Include="..\EDeals.Core.Infrastructure\EDeals.Core.Infrastructure.csproj" />
   </ItemGroup>
 

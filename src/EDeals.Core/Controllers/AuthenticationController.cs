@@ -1,4 +1,5 @@
-﻿using EDeals.Core.Application.Authentication.Commands.Login;
+﻿using EDeals.Core.API.Extensions;
+using EDeals.Core.Application.Authentication.Commands.Login;
 using EDeals.Core.Application.Authentication.Commands.Register;
 using EDeals.Core.Domain.Models.Authentiation.Login;
 using EDeals.Core.Domain.Models.Authentiation.Register;
@@ -46,11 +47,11 @@ namespace EDeals.Core.API.Controllers
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<string>> Register([FromBody] RegisterModel model)
+        public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterModel model)
         {
             var command = new RegisterCommand(model.FirstName, model.LastName, model.UserName, model.Email, model.PhoneNumber, model.Password);
 
-            return Ok(await _mediator.Send(command));
+            return ControllerExtension.Map(await _mediator.Send(command));
         }
 
         [HttpPost("login")]

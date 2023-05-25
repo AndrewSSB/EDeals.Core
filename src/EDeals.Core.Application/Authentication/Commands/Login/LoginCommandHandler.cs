@@ -1,9 +1,11 @@
-﻿using EDeals.Core.Infrastructure.Identity.Repository;
-using MediatR;
+﻿using EDeals.Core.Application.Interfaces;
+using EDeals.Core.Application.Interfaces.Mediator;
+using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
+using EDeals.Core.Domain.Models.Authentiation.Login;
 
 namespace EDeals.Core.Application.Authentication.Commands.Login
 {
-    public class LoginCommandHandler : IRequestHandler<LoginCommand, string?>
+    public class LoginCommandHandler : IMediatRCommandHandler<LoginCommand, LoginResponse>
     {
         private readonly IIdentityBaseRepository _identityBase;
 
@@ -12,7 +14,7 @@ namespace EDeals.Core.Application.Authentication.Commands.Login
             _identityBase = identityBase;
         }
 
-        public async Task<string?> Handle(LoginCommand request, CancellationToken cancellationToken) =>
+        public async Task<ResultResponse<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken) =>
             await _identityBase.SignInUserAsync(request.Password, email: request.Email, userName: request.UserName);
     }
 }

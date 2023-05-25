@@ -1,4 +1,5 @@
 ﻿using EDeals.Core.Domain.Common;
+using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 using EDeals.Core.Infrastructure.EntityConfiguration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -52,8 +53,7 @@ namespace EDeals.Core.Infrastructure.Context
             });
         }
 
-        // TODO: when creating a generic response uptade the response here
-        public static async Task<TResult> ExecuteInTransaction<TContext, TResult>(this TContext context, Func<Task<TResult>> inner, ILogger logger)
+        public static async Task<ResultResponse> ExecuteInTransaction<TContext>(this TContext context, Func<Task<ResultResponse>> inner, ILogger logger)
             where TContext : DbContext
         {
             var executionStrategy = context.Database.CreateExecutionStrategy();

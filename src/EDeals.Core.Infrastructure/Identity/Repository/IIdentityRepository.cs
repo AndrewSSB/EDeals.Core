@@ -1,4 +1,5 @@
-﻿using EDeals.Core.Infrastructure.Identity.Auth;
+﻿using EDeals.Core.Application.Interfaces;
+using EDeals.Core.Infrastructure.Identity.Auth;
 
 namespace EDeals.Core.Infrastructure.Identity.Repository
 {

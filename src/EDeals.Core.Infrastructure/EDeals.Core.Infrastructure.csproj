@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EDeals.Core.Domain\EDeals.Core.Domain.csproj" />
+    <ProjectReference Include="..\EDeals.Core.Application\EDeals.Core.Application.csproj" />
   </ItemGroup>
 
 </Project>
