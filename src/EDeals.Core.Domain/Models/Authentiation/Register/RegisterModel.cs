@@ -2,7 +2,6 @@
 {
     public sealed class RegisterModel
     {
-        // TODO: add abstract validators
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UserName { get; set; }

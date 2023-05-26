@@ -1,6 +1,11 @@
 ﻿using EDeals.Core.API.Extensions;
+using EDeals.Core.Application.Authentication.Commands.ConfirmEmail;
+using EDeals.Core.Application.Authentication.Commands.ConfirmPhone;
 using EDeals.Core.Application.Authentication.Commands.Login;
+using EDeals.Core.Application.Authentication.Commands.Logout;
 using EDeals.Core.Application.Authentication.Commands.Register;
+using EDeals.Core.Application.Authentication.Commands.SendCode;
+using EDeals.Core.Application.Authentication.Commands.SendToken;
 using EDeals.Core.Domain.Models.Authentiation.Login;
 using EDeals.Core.Domain.Models.Authentiation.Register;
 using MediatR;
@@ -10,7 +15,7 @@ using System.Net;
 namespace EDeals.Core.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthenticationController : Controller
     {
         private readonly IMediator _mediator;
@@ -58,11 +63,66 @@ namespace EDeals.Core.API.Controllers
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<string>> Login([FromBody] LoginModel model)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginModel model)
         {
             var command = new LoginCommand(model.Email, model.UserName, model.Password);
 
-            return Ok(await _mediator.Send(command));
+            return ControllerExtension.Map(await _mediator.Send(command));
+        }
+        
+        [HttpPost("logout")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> Logout()
+        {
+            var command = new LogoutCommand();
+
+            return ControllerExtension.Map(await _mediator.Send(command));
+        }
+
+        [HttpPost("validate-email")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> SendEmailConfiramtionToken()
+        {
+            var command = new SendTokenCommand();
+
+            return ControllerExtension.Map(await _mediator.Send(command));
+        }
+
+        [HttpPost("confirm-email/{token}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> ConfirmEmail(string token)
+        {
+            var command = new ConfirmEmailCommand(token);
+
+            return ControllerExtension.Map(await _mediator.Send(command));
+        }
+
+        [HttpPost("validate-phone")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> SendPhoneConfirmationCode()
+        {
+            var command = new SendCodeCommand();
+
+            return ControllerExtension.Map(await _mediator.Send(command));
+        }
+
+        [HttpPost("confirm-phone")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult> ConfirmPhone([FromBody] string digitCode)
+        {
+            var command = new ConfirmPhoneCommand(digitCode);
+
+            return ControllerExtension.Map(await _mediator.Send(command));
         }
     }
 }

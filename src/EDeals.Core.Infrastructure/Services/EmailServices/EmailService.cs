@@ -19,7 +19,7 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
             _appSettings = appSettings.Value;
         }
 
-        public async Task SendVerificationEmail(string to, string name, string digitCode, CancellationToken cancellationToken)
+        public async Task SendVerificationEmail(string to, string name, string token, CancellationToken cancellationToken)
         {
             var filename = "EmailTemplates\\VerificationEmail.html";
 
@@ -27,16 +27,13 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
 
             if (template == null) return;
 
-            // TODO: add confirmation link
             template = template
                 .Replace("{name}", name)
                 .Replace("{image_url}", _appSettings.LogoUrl)
-                .Replace("{confirmation_link}", "https://www.youtube.com/watch?v=L6JpmhftS3I&ab_channel=TobiasFate")
-                .Replace("{first}", digitCode[..3])
-                .Replace("{second}", digitCode[3..]);
+                .Replace("{confirmation_link}", $"https://{_appSettings.BaseUrl}/api/authentication/confirm-email/{token}");
 
             await _sendinBlueService.SendEmailUsingApi(to, "Verification code", template);
-            await _sendinBlueService.SendEmailUsingSmtp(to, "Verification code", template);
+            //await _sendinBlueService.SendEmailUsingSmtp(to, "Verification code", template);
         }
 
         private async Task<string?> LoadTemplate(string filename, CancellationToken cancellationToken = default)

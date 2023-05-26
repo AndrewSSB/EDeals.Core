@@ -18,8 +18,16 @@ namespace EDeals.Core.Application.Interfaces
 
         Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, Guid? userId = null, string? email = null, string? userName = null);
 
-        Task<ResultResponse> SignOutUserAsync(Guid userId);
+        Task<ResultResponse> SignOutUserAsync();
 
         Task<ResultResponse> DeleteUserAsync(Guid? userId, string? email, string? userName);
+
+        Task<ResultResponse> ConfirmUserEmail(string token);
+
+        Task<ResultResponse> ConfirmUserPhone(string digitCode);
+
+        Task<ResultResponse> SendPhoneCode();
+
+        Task<ResultResponse> SendEmailToken();
     }
 }

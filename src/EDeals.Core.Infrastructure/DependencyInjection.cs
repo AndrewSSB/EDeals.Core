@@ -1,10 +1,12 @@
 ﻿using EDeals.Core.Application.Interfaces;
 using EDeals.Core.Application.Interfaces.Email;
+using EDeals.Core.Application.Interfaces.SMS;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Repository;
 using EDeals.Core.Infrastructure.Seeders;
 using EDeals.Core.Infrastructure.Services.EmailServices;
+using EDeals.Core.Infrastructure.Services.SmsService;
 using EDeals.Core.Infrastructure.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,7 @@ namespace EDeals.Core.Infrastructure
 
             // APIs
             services.AddTransient<IBaseEmailService, BaseEmailService>();
+            services.AddTransient<ISendSmsService, SendSmsService>();
             
             // Seeders
             services.AddScoped<IdentityRoleSeeder>();
@@ -69,6 +72,7 @@ namespace EDeals.Core.Infrastructure
             services.Configure<DbSettings>(configuration.GetSection(nameof(DbSettings)));
             services.Configure<SmtpSettings>(configuration.GetSection(nameof(SmtpSettings)));
             services.Configure<ApplicationSettings>(configuration.GetSection(nameof(ApplicationSettings)));
+            services.Configure<TwilioSettings>(configuration.GetSection(nameof(TwilioSettings)));
 
             return services;
         }

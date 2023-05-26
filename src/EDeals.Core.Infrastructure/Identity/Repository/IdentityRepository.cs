@@ -1,4 +1,5 @@
 ﻿using EDeals.Core.Application.Interfaces.Email;
+using EDeals.Core.Application.Interfaces.SMS;
 using EDeals.Core.Domain.Common.ErrorMessages;
 using EDeals.Core.Domain.Common.ErrorMessages.Auth;
 using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
@@ -6,6 +7,7 @@ using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 using EDeals.Core.Domain.Enums;
 using EDeals.Core.Domain.Models.Authentiation.Login;
 using EDeals.Core.Domain.Models.Authentiation.Register;
+using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -18,19 +20,23 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 {
     public class IdentityRepository : Result, IIdentityRepository
     {
+        private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<IdentityRepository> _logger;
         private readonly IEmailService _emailService;
+        private readonly ISendSmsService _smsService;
 
         public IdentityRepository(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
             IAuthorizationService authorizationService,
             ILogger<IdentityRepository> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            AppDbContext context,
+            ISendSmsService smsService)
         {
             _userManager = userManager;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
@@ -38,6 +44,8 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             _signInManager = signInManager;
             _logger = logger;
             _emailService = emailService;
+            _context = context;
+            _smsService = smsService;
         }
 
         public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, string lastName, string userName, string email, string phoneNumber, string password)
@@ -61,8 +69,6 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             }
 
             // TODO: Add token generation logic here
-
-            await _emailService.SendVerificationEmail(email, firstName, "111111");
 
             return Ok<RegisterResponse>();
         }
@@ -104,8 +110,12 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             return Ok<LoginResponse>();
         }
 
-        public async Task<ResultResponse> SignOutUserAsync(Guid userId)
+        public async Task<ResultResponse> SignOutUserAsync()
         {
+            // TODO: add execution context
+
+            var userId = new Guid();
+
             var user = await GetUser(userId);
 
             if (user is null)
@@ -124,6 +134,130 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             var user = await GetUser(userId, email, username);
 
             return user != null ? await DeleteUserAsync(user) : Ok();
+        }
+
+        public async Task<ResultResponse> SendEmailToken()
+        {
+            var userId = new Guid();
+
+            var user = await GetUser(userId);
+
+            if (user is null)
+            {
+                _logger.LogError("User with id {userId} does not exist", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.AlreadyConfirmed, ResponseErrorSeverity.Error, GenericMessages.AlreadyConfirmed));
+            }
+
+            if (user.ResendTokenAvailableAfter > DateTime.UtcNow)
+            {
+                _logger.LogError("Time out for resending digit code", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.DigitCodeTimeout, ResponseErrorSeverity.Error, GenericMessages.DigitCodeTimeout));
+            }
+
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            
+            // TODO: Keep the credits for demo purpose
+            //await _emailService.SendVerificationEmail(user.Email, user.FirstName, confirmationToken);
+
+            user.ResendTokenAvailableAfter = DateTime.UtcNow.AddMinutes(1);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public async Task<ResultResponse> ConfirmUserEmail(string token)
+        {
+            var userId = new Guid();
+
+            var user = await GetUser(userId);
+
+            if (user is null)
+            {
+                _logger.LogError("User with id {userId} does not exist", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogError("Invalid confirmation email token");
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.InternalServer, ResponseErrorSeverity.Error, GenericMessages.GenericMessage));
+            }
+
+            var emailConfirmationResult = await _userManager.ConfirmEmailAsync(user, token);
+            
+            if (!emailConfirmationResult.Succeeded)
+            {
+                return BadRequest(emailConfirmationResult.ToApplicationResult());
+            }
+
+            user.ResendTokenAvailableAfter = null;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public async Task<ResultResponse> SendPhoneCode()
+        {
+            var userId = new Guid();
+
+            var user = await GetUser(userId);
+
+            if (user is null)
+            {
+                _logger.LogError("User with id {userId} does not exist", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            if (user.PhoneNumberConfirmed)
+            {
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.AlreadyConfirmed, ResponseErrorSeverity.Error, GenericMessages.AlreadyConfirmed));
+            }
+            
+            if (user.ResendCodeAvailableAfter > DateTime.UtcNow)
+            {
+                _logger.LogError("Time out for resending digit code", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.DigitCodeTimeout, ResponseErrorSeverity.Error, GenericMessages.DigitCodeTimeout));
+            }
+
+            user.DigitCode = GenerateDigitCode();
+            user.ResendCodeAvailableAfter = DateTime.UtcNow.AddMinutes(1);
+
+            // TODO: Keep the credits for demo purpose
+            //await _smsService.SendSmsNotification(user.PhoneNumber, user.DigitCode);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public async Task<ResultResponse> ConfirmUserPhone(string digitCode)
+        {
+            var userId = new Guid();
+
+            var user = await GetUser(userId);
+
+            if (user is null)
+            {
+                _logger.LogError("User with id {userId} does not exist", userId);
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            if (user.DigitCode != digitCode)
+            {
+                _logger.LogError("Invalid digit code");
+                return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.InvalidDigitCode, ResponseErrorSeverity.Error, GenericMessages.InvalidDigitCode));
+            }
+
+            user.PhoneNumberConfirmed = true;
+            user.ResendCodeAvailableAfter = null;
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
 
         public async Task<ApplicationUser?> FindUser(Guid? userId, string? email, string? username) =>
@@ -171,6 +305,12 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             }
 
             return user;
+        }
+
+        private static string GenerateDigitCode()
+        {
+            Random generator = new();
+            return generator.Next(0, 1000000).ToString("D6");
         }
         #endregion
     }

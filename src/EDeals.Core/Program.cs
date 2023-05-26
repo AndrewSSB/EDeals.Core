@@ -36,6 +36,8 @@ try
         .ConfigureSettings(builder.Configuration)
         .AddCustomIdentity();
 
+    builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
     // Add Logging
     builder.Host.UseSerilog((context, configuration) =>
         configuration.ReadFrom.Configuration(context.Configuration));

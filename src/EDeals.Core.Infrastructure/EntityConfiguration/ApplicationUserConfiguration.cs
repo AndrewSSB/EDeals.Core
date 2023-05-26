@@ -28,6 +28,16 @@ namespace EDeals.Core.Infrastructure.EntityConfiguration
 
             builder.Property(x => x.PhoneNumber)
                 .HasMaxLength(15);
+            
+            builder.Property(x => x.DigitCode)
+                .HasMaxLength(6)
+                .IsRequired(false);
+
+            builder.Property(x => x.ResendCodeAvailableAfter)
+                .IsRequired(false);
+            
+            builder.Property(x => x.ResendTokenAvailableAfter)
+                .IsRequired(false);
 
             builder.HasMany(x => x.UserRoles)
                 .WithOne(x => x.User)

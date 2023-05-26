@@ -29,6 +29,11 @@ namespace EDeals.Core.Infrastructure.Identity.Auth
         
         public string LastName { get; private set; }
 
+        public string DigitCode { get; set; }
+
+        public DateTime? ResendCodeAvailableAfter { get; set; }
+        public DateTime? ResendTokenAvailableAfter { get; set; }
+
         public string FullName => $"{FirstName} {LastName}";
 
         // Navigation properties

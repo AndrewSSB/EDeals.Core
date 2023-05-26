@@ -3,6 +3,7 @@ using System;
 using EDeals.Core.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EDeals.Core.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230526011515_AddedPhoneVerificationCode")]
+    partial class AddedPhoneVerificationCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,10 +112,7 @@ namespace EDeals.Core.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("ResendCodeAvailableAfter")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("ResendTokenAvailableAfter")
+                    b.Property<DateTime?>("ResendAvailableAfter")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("SecurityStamp")
