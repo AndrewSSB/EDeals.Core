@@ -1,4 +1,5 @@
-﻿using EDeals.Core.Domain.Common.ErrorMessages;
+﻿using EDeals.Core.Application.Interfaces.Email;
+using EDeals.Core.Domain.Common.ErrorMessages;
 using EDeals.Core.Domain.Common.ErrorMessages.Auth;
 using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
@@ -22,18 +23,21 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<IdentityRepository> _logger;
+        private readonly IEmailService _emailService;
 
         public IdentityRepository(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
             IAuthorizationService authorizationService,
-            ILogger<IdentityRepository> logger)
+            ILogger<IdentityRepository> logger,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
             _authorizationService = authorizationService;
             _signInManager = signInManager;
             _logger = logger;
+            _emailService = emailService;
         }
 
         public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, string lastName, string userName, string email, string phoneNumber, string password)
@@ -57,6 +61,8 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             }
 
             // TODO: Add token generation logic here
+
+            await _emailService.SendVerificationEmail(email, firstName, "111111");
 
             return Ok<RegisterResponse>();
         }

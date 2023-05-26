@@ -24,4 +24,10 @@
     <ProjectReference Include="..\EDeals.Core.Infrastructure\EDeals.Core.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\EmailTemplates\VerificationEmail.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
