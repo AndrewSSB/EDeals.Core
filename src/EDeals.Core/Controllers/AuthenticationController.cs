@@ -6,8 +6,8 @@ using EDeals.Core.Application.Authentication.Commands.Logout;
 using EDeals.Core.Application.Authentication.Commands.Register;
 using EDeals.Core.Application.Authentication.Commands.SendCode;
 using EDeals.Core.Application.Authentication.Commands.SendToken;
-using EDeals.Core.Domain.Models.Authentiation.Login;
-using EDeals.Core.Domain.Models.Authentiation.Register;
+using EDeals.Core.Application.Models.Authentication.Login;
+using EDeals.Core.Application.Models.Authentication.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -114,11 +114,11 @@ namespace EDeals.Core.API.Controllers
             return ControllerExtension.Map(await _mediator.Send(command));
         }
 
-        [HttpPost("confirm-phone")]
+        [HttpPost("confirm-phone/{digitCode}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult> ConfirmPhone([FromBody] string digitCode)
+        public async Task<ActionResult> ConfirmPhone(string digitCode)
         {
             var command = new ConfirmPhoneCommand(digitCode);
 

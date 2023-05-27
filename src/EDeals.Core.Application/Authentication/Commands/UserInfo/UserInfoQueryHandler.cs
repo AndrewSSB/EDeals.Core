@@ -1,7 +1,7 @@
 ﻿using EDeals.Core.Application.Interfaces.Mediator;
 using EDeals.Core.Application.Interfaces.UserServices;
+using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
-using EDeals.Core.Domain.Models.User;
 
 namespace EDeals.Core.Application.Authentication.Commands.UserInfo
 {

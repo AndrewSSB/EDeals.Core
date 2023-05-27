@@ -1,4 +1,4 @@
-﻿using EDeals.Core.Application.Interfaces;
+﻿using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.Mediator;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 
@@ -6,9 +6,9 @@ namespace EDeals.Core.Application.Authentication.Commands.Logout
 {
     public class LogoutCommandHandler : IMediatRCommandHandler<LogoutCommand>
     {
-        private readonly IIdentityBaseRepository _identityBase;
+        private readonly IIdentityRepository _identityBase;
 
-        public LogoutCommandHandler(IIdentityBaseRepository identityBase)
+        public LogoutCommandHandler(IIdentityRepository identityBase)
         {
             _identityBase = identityBase;
         }

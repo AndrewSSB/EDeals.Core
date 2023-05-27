@@ -1,6 +1,8 @@
 ﻿using EDeals.Core.Application.Interfaces.UserServices;
+using EDeals.Core.Application.Models.UserProfile;
+using EDeals.Core.Domain.Common.ErrorMessages;
+using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
-using EDeals.Core.Domain.Models.User;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
 using EDeals.Core.Infrastructure.Identity.Repository;
@@ -11,15 +13,17 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
 {
     public class UserService : Result, IUserService
     {
-        private readonly IIdentityRepository _identityRepo;
         private readonly ICustomExecutionContext _executionContext; 
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserService(ICustomExecutionContext executionContext, IIdentityRepository identityRepo, UserManager<ApplicationUser> userManager)
+        public UserService(ICustomExecutionContext executionContext, 
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
             _executionContext = executionContext;
-            _identityRepo = identityRepo;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<ResultResponse<UserInfoResponse>> GetUserInfo()
@@ -33,17 +37,24 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
 
         public async Task<ResultResponse> DeleteUserAsync()
         {
-            // TODO: maybe signout the user, and move to soft delete
             var userId = _executionContext.UserId;
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
-            return user != null ? await DeleteUserAsync(user) : Ok();
-        }
+            if (user == null)
+            {
+                return BadRequest(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
 
-        private async Task<ResultResponse> DeleteUserAsync(ApplicationUser user)
-        {
-            var result = await _userManager.DeleteAsync(user);
+            user.UserName += $"_{DateTime.UtcNow}";
+            user.IsDeleted = true;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.SignOutAsync();
+            }
 
             return result.ToApplicationResult();
         }

@@ -1,10 +1,10 @@
-﻿using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
-using EDeals.Core.Domain.Models.Authentiation.Login;
-using EDeals.Core.Domain.Models.Authentiation.Register;
+﻿using EDeals.Core.Application.Models.Authentication.Login;
+using EDeals.Core.Application.Models.Authentication.Register;
+using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 
-namespace EDeals.Core.Application.Interfaces
+namespace EDeals.Core.Application.Interfaces.IIdentityRepository
 {
-    public interface IIdentityBaseRepository
+    public interface IIdentityRepository
     {
         Task<ResultResponse> GetUserNameAsync(Guid userId);
 

@@ -1,5 +1,5 @@
-﻿using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
-using EDeals.Core.Domain.Models.User;
+﻿using EDeals.Core.Application.Models.UserProfile;
+using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 
 namespace EDeals.Core.Application.Interfaces.UserServices
 {

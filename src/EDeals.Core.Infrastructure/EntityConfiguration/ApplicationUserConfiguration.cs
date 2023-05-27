@@ -8,6 +8,8 @@ namespace EDeals.Core.Infrastructure.EntityConfiguration
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
+            builder.HasQueryFilter(entity => !entity.IsDeleted);
+
             builder.Property(x => x.FirstName)
                 .HasMaxLength(50);
             

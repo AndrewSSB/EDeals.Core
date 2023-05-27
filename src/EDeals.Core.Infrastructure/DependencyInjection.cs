@@ -1,5 +1,5 @@
-﻿using EDeals.Core.Application.Interfaces;
-using EDeals.Core.Application.Interfaces.Email;
+﻿using EDeals.Core.Application.Interfaces.Email;
+using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.SMS;
 using EDeals.Core.Application.Interfaces.UserServices;
 using EDeals.Core.Infrastructure.Context;
@@ -46,7 +46,6 @@ namespace EDeals.Core.Infrastructure
         public static IServiceCollection AddInfrastructureMethods(this IServiceCollection services)
         {
             // Services
-            services.AddTransient<IIdentityBaseRepository, IdentityRepository>();
             services.AddTransient<IIdentityRepository, IdentityRepository>();
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<ITokenHelper, TokenHelper>();

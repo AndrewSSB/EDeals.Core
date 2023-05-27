@@ -1,4 +1,4 @@
-﻿namespace EDeals.Core.Domain.Models.Authentiation.Login
+﻿namespace EDeals.Core.Application.Models.Authentication.Login
 {
     public sealed class LoginResponse
     {

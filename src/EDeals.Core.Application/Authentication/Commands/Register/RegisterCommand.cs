@@ -1,5 +1,5 @@
 ﻿using EDeals.Core.Application.Interfaces.Mediator;
-using EDeals.Core.Domain.Models.Authentiation.Register;
+using EDeals.Core.Application.Models.Authentication.Register;
 
 namespace EDeals.Core.Application.Authentication.Commands.Register
 {

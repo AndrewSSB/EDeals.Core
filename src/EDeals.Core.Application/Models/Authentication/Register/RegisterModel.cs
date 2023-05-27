@@ -1,4 +1,4 @@
-﻿namespace EDeals.Core.Domain.Models.Authentiation.Register
+﻿namespace EDeals.Core.Application.Models.Authentication.Register
 {
     public sealed class RegisterModel
     {

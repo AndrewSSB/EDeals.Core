@@ -1,5 +1,5 @@
 ﻿using EDeals.Core.Application.Interfaces.Mediator;
-using EDeals.Core.Domain.Models.User;
+using EDeals.Core.Application.Models.UserProfile;
 
 namespace EDeals.Core.Application.Authentication.Commands.UserInfo
 {

@@ -1,4 +1,4 @@
-﻿using EDeals.Core.Application.Interfaces;
+﻿using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.Mediator;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 
@@ -6,9 +6,9 @@ namespace EDeals.Core.Application.Authentication.Commands.ConfirmEmail
 {
     public class ConfirmEmailCommandHandler : IMediatRCommandHandler<ConfirmEmailCommand>
     {
-        private readonly IIdentityBaseRepository _identityBase;
+        private readonly IIdentityRepository _identityBase;
 
-        public ConfirmEmailCommandHandler(IIdentityBaseRepository identityBase)
+        public ConfirmEmailCommandHandler(IIdentityRepository identityBase)
         {
             _identityBase = identityBase;
         }

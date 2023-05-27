@@ -1,8 +1,6 @@
 ﻿using EDeals.Core.API.Extensions;
-using EDeals.Core.Application.Authentication.Commands.Register;
 using EDeals.Core.Application.Authentication.Commands.UserInfo;
-using EDeals.Core.Domain.Models.Authentiation.Register;
-using EDeals.Core.Domain.Models.User;
+using EDeals.Core.Application.Models.UserProfile;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

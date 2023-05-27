@@ -1,15 +1,15 @@
-﻿using EDeals.Core.Application.Interfaces;
+﻿using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.Mediator;
+using EDeals.Core.Application.Models.Authentication.Login;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
-using EDeals.Core.Domain.Models.Authentiation.Login;
 
 namespace EDeals.Core.Application.Authentication.Commands.Login
 {
     public class LoginCommandHandler : IMediatRCommandHandler<LoginCommand, LoginResponse>
     {
-        private readonly IIdentityBaseRepository _identityBase;
+        private readonly IIdentityRepository _identityBase;
 
-        public LoginCommandHandler(IIdentityBaseRepository identityBase)
+        public LoginCommandHandler(IIdentityRepository identityBase)
         {
             _identityBase = identityBase;
         }

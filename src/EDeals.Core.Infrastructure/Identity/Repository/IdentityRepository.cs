@@ -1,12 +1,13 @@
 ﻿using EDeals.Core.Application.Interfaces.Email;
+using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.SMS;
+using EDeals.Core.Application.Models.Authentication.Login;
+using EDeals.Core.Application.Models.Authentication.Register;
 using EDeals.Core.Domain.Common.ErrorMessages;
 using EDeals.Core.Domain.Common.ErrorMessages.Auth;
 using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 using EDeals.Core.Domain.Enums;
-using EDeals.Core.Domain.Models.Authentiation.Login;
-using EDeals.Core.Domain.Models.Authentiation.Register;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
@@ -53,7 +54,12 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             _executionContext = executionContext;
         }
 
-        public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, string lastName, string userName, string email, string phoneNumber, string password)
+        public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, 
+            string lastName, 
+            string userName, 
+            string email, 
+            string phoneNumber, 
+            string password)
         {
             var user = new ApplicationUser(firstName, lastName, userName, email, phoneNumber);
 
@@ -93,7 +99,9 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             return Ok(response);
         }
 
-        public async Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, string? email = null, string? username = null)
+        public async Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, 
+            string? email = null, 
+            string? username = null)
         {
             var user = await GetUser(email: email, username: username);
 
@@ -123,9 +131,9 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
                 ExpiresUtc = DateTime.UtcNow.AddHours(1),
             };
 
-            await _signInManager.SignInAsync(user, signInConfiguration);
-
             var userClaims = await _userManager.GetClaimsAsync(user);
+
+            await _signInManager.SignInWithClaimsAsync(user, signInConfiguration, userClaims);
             
             var response = new LoginResponse
             {
@@ -276,9 +284,6 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
             return Ok();
         }
-
-        public async Task<ApplicationUser?> FindUser(Guid? userId, string? email, string? username) =>
-            await GetUser(userId, email, username);
 
         public async Task<ResultResponse> GetUserNameAsync(Guid userId) =>
             Ok(await _userManager.Users.Where(x => x.Id == userId).Select(x => x.UserName).FirstOrDefaultAsync());
