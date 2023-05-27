@@ -2,6 +2,7 @@
 {
     public sealed class RegisterResponse
     {
-        public int MyProperty { get; set; } = 10;
+        public string? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

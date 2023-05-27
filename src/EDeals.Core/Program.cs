@@ -4,6 +4,7 @@ using EDeals.Core.Infrastructure;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Seeders;
 using EDeals.Core.Infrastructure.Settings;
+using EDeals.Core.Infrastructure.Shared.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -52,6 +53,8 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+
+    app.UseMiddleware<ExceptionMiddleware>();
 
     app.UseSerilogRequestLogging();
 

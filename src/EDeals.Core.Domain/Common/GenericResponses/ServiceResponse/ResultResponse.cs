@@ -35,6 +35,11 @@ namespace EDeals.Core.Domain.Common.GenericResponses.ServiceResponse
     {
         public TResponse? ResponseData { get; private set; }
 
+        public ResultResponse()
+            : base()
+        {
+        }
+
         public ResultResponse(ResultCode result, TResponse data)
             : base(result)
         {

@@ -10,11 +10,13 @@ using EDeals.Core.Domain.Models.Authentiation.Register;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
+using EDeals.Core.Infrastructure.Shared.ExecutionContext;
+using EDeals.Core.Infrastructure.TokenHelpers;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace EDeals.Core.Infrastructure.Identity.Repository
 {
@@ -23,29 +25,32 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<IdentityRepository> _logger;
         private readonly IEmailService _emailService;
         private readonly ISendSmsService _smsService;
+        private readonly ITokenHelper _tokenHelper;
+        private readonly ICustomExecutionContext _executionContext;
+
+        private const string RefreshTokenProvider = "RefreshTokenProvider";
+        private const string TokenName = "RefreshToken";
 
         public IdentityRepository(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            IAuthorizationService authorizationService,
             ILogger<IdentityRepository> logger,
             IEmailService emailService,
             AppDbContext context,
-            ISendSmsService smsService)
+            ISendSmsService smsService,
+            ITokenHelper tokenHelper,
+            ICustomExecutionContext executionContext)
         {
             _userManager = userManager;
-            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-            _authorizationService = authorizationService;
             _signInManager = signInManager;
             _logger = logger;
             _emailService = emailService;
             _context = context;
             _smsService = smsService;
+            _tokenHelper = tokenHelper;
+            _executionContext = executionContext;
         }
 
         public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, string lastName, string userName, string email, string phoneNumber, string password)
@@ -57,6 +62,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             if (!userCreationResult.Succeeded)
             {
                 _logger.LogError("Account creation failed - ", userCreationResult.Errors);
+                //return userCreationResult.ToApplicationResult<RegisterResponse>();
                 return BadRequest<RegisterResponse>(new ResponseError(ErrorCodes.AccountCreation, ResponseErrorSeverity.Error, RegisterMessages.CreationFailure));
             }
             
@@ -68,18 +74,32 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
                 return BadRequest<RegisterResponse>(new ResponseError(ErrorCodes.AssigningRole, ResponseErrorSeverity.Error, RegisterMessages.RoleAssigningFailure));
             }
 
-            // TODO: Add token generation logic here
+            var userClaims = new List<Claim> 
+            {
+                new Claim(ClaimTypes.Role, RoleNames.UserRole),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.UserData, user.Email),
+            };
 
-            return Ok<RegisterResponse>();
+            await _userManager.AddClaimsAsync(user, userClaims);
+
+            var response = new RegisterResponse
+            {
+                AccessToken = _tokenHelper.CreateToken(userClaims),
+                RefreshToken = await _tokenHelper.SetAuthenticationToken(user, RefreshTokenProvider, TokenName)
+            };
+
+            return Ok(response);
         }
 
-        public async Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, Guid? userId = null, string? email = null, string? username = null)
+        public async Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, string? email = null, string? username = null)
         {
-            var user = await GetUser(userId, email, username);
+            var user = await GetUser(email: email, username: username);
 
             if (user is null)
             {
-                _logger.LogError("User with id {userId} / email {email} / username {username} does not exist", userId, email, username);
+                _logger.LogError("User with email {email} / username {username} does not exist", email, username);
                 return BadRequest<LoginResponse>(new ResponseError(ErrorCodes.InvalidUsernameOrPassword, ResponseErrorSeverity.Error, LoginMessages.InvalidUsernameOrPassword));
             }
 
@@ -105,16 +125,20 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
             await _signInManager.SignInAsync(user, signInConfiguration);
 
-            // TODO: Add token generation logic here
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            
+            var response = new LoginResponse
+            {
+                AccessToken = _tokenHelper.CreateToken(userClaims.ToList()),
+                RefreshToken = await _tokenHelper.SetAuthenticationToken(user, RefreshTokenProvider, TokenName)
+            };
 
-            return Ok<LoginResponse>();
+            return Ok(response);
         }
 
         public async Task<ResultResponse> SignOutUserAsync()
         {
-            // TODO: add execution context
-
-            var userId = new Guid();
+            var userId = _executionContext.UserId;
 
             var user = await GetUser(userId);
 
@@ -127,13 +151,6 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             await _signInManager.SignOutAsync();
 
             return Ok();
-        }
-
-        public async Task<ResultResponse> DeleteUserAsync(Guid? userId, string? email, string? username)
-        {
-            var user = await GetUser(userId, email, username);
-
-            return user != null ? await DeleteUserAsync(user) : Ok();
         }
 
         public async Task<ResultResponse> SendEmailToken()
@@ -280,31 +297,31 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
         }
 
         #region Private methods
-        private async Task<ResultResponse> DeleteUserAsync(ApplicationUser user)
-        {
-            var result = await _userManager.DeleteAsync(user);
-
-            return result.ToApplicationResult();
-        }
-
         private async Task<ApplicationUser?> GetUser(Guid? userId = null, string? email = null, string? username = null)
         {
             var user = new ApplicationUser();
 
-            if (userId is not null)
+            try
             {
-                user = await _userManager.FindByIdAsync(userId.ToString()!);
-            }
-            else if (!string.IsNullOrEmpty(email))
-            {
-                user = await _userManager.FindByEmailAsync(email);
-            }
-            else if (!string.IsNullOrEmpty(username))
-            {
-                user = await _userManager.FindByNameAsync(username);
-            }
+                if (userId is not null)
+                {
+                    user = await _userManager.FindByIdAsync(userId.ToString()!);
+                }
+                else if (!string.IsNullOrEmpty(email))
+                {
+                    user = await _userManager.FindByEmailAsync(email);
+                }
+                else if (!string.IsNullOrEmpty(username))
+                {
+                    user = await _userManager.FindByNameAsync(username);
+                }
 
-            return user;
+                return user;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static string GenerateDigitCode()

@@ -1,6 +1,7 @@
 ﻿using EDeals.Core.Domain.Common;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Interceptors;
+using EDeals.Core.Infrastructure.Interceptors.InterceptorExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

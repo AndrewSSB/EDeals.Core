@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EDeals.Core.Infrastructure.Identity.Auth
 {
@@ -19,8 +20,10 @@ namespace EDeals.Core.Infrastructure.Identity.Auth
             PhoneNumber = phoneNumber;
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } 
         
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; } 
         
         public bool IsDeleted { get; set; }

@@ -16,11 +16,9 @@ namespace EDeals.Core.Application.Interfaces
 
         Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, string lastName, string userName, string email, string phoneNumber, string password);
 
-        Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, Guid? userId = null, string? email = null, string? userName = null);
+        Task<ResultResponse<LoginResponse>> SignInUserAsync(string password, string? email = null, string? userName = null);
 
         Task<ResultResponse> SignOutUserAsync();
-
-        Task<ResultResponse> DeleteUserAsync(Guid? userId, string? email, string? userName);
 
         Task<ResultResponse> ConfirmUserEmail(string token);
 

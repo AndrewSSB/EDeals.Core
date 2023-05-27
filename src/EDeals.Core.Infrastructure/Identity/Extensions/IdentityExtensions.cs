@@ -16,5 +16,13 @@ namespace EDeals.Core.Infrastructure.Identity.Extensions
                     new ResponseError(ErrorCodes.InternalServer, ResponseErrorSeverity.Exception, result.Errors.Select(e => e.Description)?.FirstOrDefault()?.ToString() ?? GenericMessages.GenericMessage)
                 );
 
+        public static ResultResponse<T> ToApplicationResult<T>(this IdentityResult result) =>
+            result.Succeeded ?
+                new ResultResponse<T>()
+                :
+                new ResultResponse<T>(
+                    ResultCode.InternalError,
+                    new ResponseError(ErrorCodes.InternalServer, ResponseErrorSeverity.Exception, result.Errors.Select(e => e.Description)?.FirstOrDefault()?.ToString() ?? GenericMessages.GenericMessage)
+                );
     }
 }
