@@ -39,6 +39,13 @@ try
 
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+    builder.Services.AddAuthorization(opt =>
+    {
+        opt.AddPolicy("User", policy => policy.RequireRole("User").RequireAuthenticatedUser().Build());
+        opt.AddPolicy("Admin", policy => policy.RequireRole("Admin").RequireAuthenticatedUser().Build());
+        opt.AddPolicy("SuperAdmin", policy => policy.RequireRole("SuperAdmin").RequireAuthenticatedUser().Build());
+    });
+
     // Add Logging
     builder.Host.UseSerilog((context, configuration) =>
         configuration.ReadFrom.Configuration(context.Configuration));
@@ -53,6 +60,12 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+
+    app.UseCors(corsOpt => {
+        corsOpt.AllowAnyOrigin()
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
 
     app.UseMiddleware<ExceptionMiddleware>();
 

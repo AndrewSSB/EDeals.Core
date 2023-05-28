@@ -2,6 +2,7 @@
 using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.SMS;
 using EDeals.Core.Application.Interfaces.UserServices;
+using EDeals.Core.Application.Mappings;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Repository;
@@ -18,7 +19,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace EDeals.Core.Infrastructure
 {
@@ -26,6 +26,8 @@ namespace EDeals.Core.Infrastructure
     {
         public static void AddDbContext(this IServiceCollection services, DbSettings dbSettings)
         {
+            // Check git status
+
             var connectionString = dbSettings.MySqlConnectionString;
             var db_username = dbSettings.Username;
             var db_password = dbSettings.Password;
@@ -51,7 +53,8 @@ namespace EDeals.Core.Infrastructure
             services.AddTransient<ITokenHelper, TokenHelper>();
             services.AddTransient<IUserService, UserService>();
             services.AddSingleton<IDateTimeHelper, DateTimeHelper>();
-            services.AddSingleton<ICustomExecutionContext, CustomExecutionContext>();
+            services.AddHttpContextAccessor().AddScoped<ICustomExecutionContext, CustomExecutionContext>();
+            services.AddMappings();
 
             services.AddScoped<RefreshTokenProvider<ApplicationUser>>();
 

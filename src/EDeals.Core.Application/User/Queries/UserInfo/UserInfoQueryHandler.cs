@@ -3,7 +3,7 @@ using EDeals.Core.Application.Interfaces.UserServices;
 using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
 
-namespace EDeals.Core.Application.Authentication.Commands.UserInfo
+namespace EDeals.Core.Application.User.Queries.UserInfo
 {
     public class UserInfoQueryHandler : IMediatRQueryHandler<UserInfoQuery, UserInfoResponse>
     {

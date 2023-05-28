@@ -9,6 +9,7 @@ using EDeals.Core.Application.Authentication.Commands.SendToken;
 using EDeals.Core.Application.Models.Authentication.Login;
 using EDeals.Core.Application.Models.Authentication.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -25,6 +26,7 @@ namespace EDeals.Core.API.Controllers
             _mediator = mediator;
         }
 
+        [AllowAnonymous]
         /// <summary>
         /// 
         /// </summary>
@@ -59,6 +61,7 @@ namespace EDeals.Core.API.Controllers
             return ControllerExtension.Map(await _mediator.Send(command));
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]

@@ -32,7 +32,21 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
-            return Ok(new UserInfoResponse());
+            if (user == null)
+            {
+                return BadRequest<UserInfoResponse>(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            return Ok(new UserInfoResponse
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName, 
+                LastName = user.LastName,
+                IsEmailVerified = user.EmailConfirmed,
+                IsPhoneNumberVerified = user.PhoneNumberConfirmed,
+                PhoneNumber = user.PhoneNumber,
+            });
         }
 
         public async Task<ResultResponse> DeleteUserAsync()
