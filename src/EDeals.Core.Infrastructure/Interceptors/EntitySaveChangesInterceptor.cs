@@ -2,7 +2,6 @@
 using EDeals.Core.Infrastructure.Interceptors.InterceptorExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System;
 
 namespace EDeals.Core.Infrastructure.Interceptors
 {
