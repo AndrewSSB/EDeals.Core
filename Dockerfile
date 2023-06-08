@@ -16,4 +16,4 @@ RUN dotnet publish "src/EDeals.Core" -c Release --no-build --output /app
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["dotnet", "EDeals.Core.dll"]
+ENTRYPOINT ["dotnet", "EDeals.Core.Api.dll"]
