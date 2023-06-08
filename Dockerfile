@@ -7,16 +7,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["EDeals.Core/EDeals.Core.csproj", "EDeals.Core/"]
-RUN dotnet restore "EDeals.Core/EDeals.Core.csproj"
 COPY . .
-WORKDIR "/src/EDeals.Core"
-RUN dotnet build "EDeals.Core.csproj" -c Release -o /app/build
+RUN dotnet restore "src/EDeals.Core"
+RUN dotnet build "src/EDeals.Core" -c Release --no-restore
 
-FROM build AS publish
-RUN dotnet publish "EDeals.Core.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/EDeals.Core" -c Release --no build --output /app
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app .
 ENTRYPOINT ["dotnet", "EDeals.Core.dll"]
