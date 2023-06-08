@@ -11,7 +11,7 @@ COPY . .
 RUN dotnet restore "src/EDeals.Core"
 RUN dotnet build "src/EDeals.Core" -c Release --no-restore
 
-RUN dotnet publish "src/EDeals.Core" -c Release --no build --output /app
+RUN dotnet publish "src/EDeals.Core" -c Release --no-build --output /app
 
 FROM base AS final
 WORKDIR /app
