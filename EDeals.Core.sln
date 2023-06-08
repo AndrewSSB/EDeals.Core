@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B19AA3E8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{F05E0922-0D6E-4C63-812F-C752AFED50D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EDeals.Core.API", "src\EDeals.Core\EDeals.Core.API.csproj", "{118D144D-18BB-4DB5-8B7D-E8CE120B84C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EDeals.Core", "src\EDeals.Core\EDeals.Core.csproj", "{118D144D-18BB-4DB5-8B7D-E8CE120B84C0}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{DE946600-2AF0-4DCA-945D-973EF19F625F}"
 EndProject
