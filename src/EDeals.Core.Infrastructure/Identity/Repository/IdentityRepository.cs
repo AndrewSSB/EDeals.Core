@@ -369,7 +369,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
             HttpContent request = new StringContent(modelJson, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsync($"{appSettings.CatalogBaseUrl}/api/userinfo", request);
+            var response = await _client.PostAsync($"{appSettings.ApiProtocol}://{appSettings.CatalogBaseUrl}/api/userinfo", request);
 
             if (!response.IsSuccessStatusCode)
             {
