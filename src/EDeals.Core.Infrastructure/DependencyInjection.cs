@@ -57,6 +57,7 @@ namespace EDeals.Core.Infrastructure
             services.AddMappings();
 
             services.AddScoped<RefreshTokenProvider<ApplicationUser>>();
+            services.AddHttpClient();
 
             // APIs
             services.AddTransient<IBaseEmailService, BaseEmailService>();

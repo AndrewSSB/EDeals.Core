@@ -1,6 +1,7 @@
 ﻿using EDeals.Core.Application.Interfaces.Email;
 using EDeals.Core.Application.Interfaces.IIdentityRepository;
 using EDeals.Core.Application.Interfaces.SMS;
+using EDeals.Core.Application.Models.Authentication;
 using EDeals.Core.Application.Models.Authentication.Login;
 using EDeals.Core.Application.Models.Authentication.Register;
 using EDeals.Core.Domain.Common.ErrorMessages;
@@ -11,13 +12,21 @@ using EDeals.Core.Domain.Enums;
 using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
+using EDeals.Core.Infrastructure.Settings;
 using EDeals.Core.Infrastructure.Shared.ExecutionContext;
 using EDeals.Core.Infrastructure.TokenHelpers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Security.Policy;
+using System.Text;
+using System.Threading;
 
 namespace EDeals.Core.Infrastructure.Identity.Repository
 {
@@ -31,6 +40,8 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
         private readonly ISendSmsService _smsService;
         private readonly ITokenHelper _tokenHelper;
         private readonly ICustomExecutionContext _executionContext;
+        private readonly HttpClient _client;
+        private readonly ApplicationSettings appSettings;
 
         private const string RefreshTokenProvider = "RefreshTokenProvider";
         private const string TokenName = "RefreshToken";
@@ -42,7 +53,9 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             AppDbContext context,
             ISendSmsService smsService,
             ITokenHelper tokenHelper,
-            ICustomExecutionContext executionContext)
+            ICustomExecutionContext executionContext,
+            IOptions<ApplicationSettings> appSettings,
+            IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -52,6 +65,8 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             _smsService = smsService;
             _tokenHelper = tokenHelper;
             _executionContext = executionContext;
+            this.appSettings = appSettings.Value;
+            _client = httpClientFactory.CreateClient();
         }
 
         public async Task<ResultResponse<RegisterResponse>> CreateUserAsync(string firstName, 
@@ -90,9 +105,20 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
             await _userManager.AddClaimsAsync(user, userClaims);
 
+            var token = _tokenHelper.CreateToken(userClaims);
+
+            await SendDataToCatalog(new AddUserInfoModel
+            {
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                UserName = userName,
+                PhoneNumber = phoneNumber
+            }, token);
+
             var response = new RegisterResponse
             {
-                AccessToken = _tokenHelper.CreateToken(userClaims),
+                AccessToken = token,
                 RefreshToken = await _tokenHelper.SetAuthenticationToken(user, RefreshTokenProvider, TokenName)
             };
 
@@ -333,6 +359,22 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
         {
             Random generator = new();
             return generator.Next(0, 1000000).ToString("D6");
+        }
+
+        private async Task SendDataToCatalog(AddUserInfoModel model, string jwtToken)
+        {
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, jwtToken);
+
+            var modelJson = JsonConvert.SerializeObject(model);
+
+            HttpContent request = new StringContent(modelJson, Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync($"{appSettings.CatalogBaseUrl}/api/userinfo", request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("N-A MERS ADD USERINFO");
+            }
         }
         #endregion
     }
