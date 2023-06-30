@@ -80,7 +80,7 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
 
         public async Task<ResultResponse<List<UserInfoResponse>>> GetUsers()
         {
-            return Ok(await _context.Users.Select(user => new UserInfoResponse
+            return Ok(await _context.Users.Where(x => x.Id != _executionContext.UserId).Select(user => new UserInfoResponse
             {
                 Email = user.Email,
                 UserName = user.UserName,
