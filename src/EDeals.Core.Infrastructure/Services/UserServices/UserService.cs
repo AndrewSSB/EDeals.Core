@@ -78,9 +78,17 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
             return result.ToApplicationResult();
         }
 
-        public async Task<ResultResponse<List<UserInfoResponse>>> GetUsers()
+        public async Task<ResultResponse<List<UserInfoResponse>>> GetUsers(string username)
         {
-            return Ok(await _context.Users.Where(x => x.Id != _executionContext.UserId).Select(user => new UserInfoResponse
+            var users = _context.Users.Where(x => x.Id != _executionContext.UserId);
+                
+            if (string.IsNullOrEmpty(username))
+            {
+                users = users.Where(x => x.UserName.Contains(username));
+            }
+                
+                
+            var response = await users.Select(user => new UserInfoResponse
             {
                 Email = user.Email,
                 UserName = user.UserName,
@@ -90,7 +98,9 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
                 IsPhoneNumberVerified = user.PhoneNumberConfirmed,
                 PhoneNumber = user.PhoneNumber,
             })
-            .ToListAsync());
+            .ToListAsync();
+
+            return Ok(response);
         }
     }
 }

@@ -46,9 +46,9 @@ namespace EDeals.Core.API.Controllers
 
         [HttpGet("all")]
         [Produces("application/json")]
-        public async Task<ActionResult<List<UserInfoResponse>>> GetUsers()
+        public async Task<ActionResult<List<UserInfoResponse>>> GetUsers([FromQuery] string? userName)
         {
-            return ControllerExtension.Map(await _userService.GetUsers());
+            return ControllerExtension.Map(await _userService.GetUsers(userName));
         }
     }
 }
