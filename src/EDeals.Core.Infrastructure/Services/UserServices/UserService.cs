@@ -82,7 +82,7 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
         {
             var users = _context.Users.Where(x => x.Id != _executionContext.UserId);
                 
-            if (string.IsNullOrEmpty(username))
+            if (!string.IsNullOrEmpty(username))
             {
                 users = users.Where(x => x.UserName.Contains(username));
             }
