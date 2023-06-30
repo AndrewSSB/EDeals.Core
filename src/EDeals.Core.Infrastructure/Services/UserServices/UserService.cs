@@ -3,11 +3,13 @@ using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Domain.Common.ErrorMessages;
 using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
 using EDeals.Core.Domain.Common.GenericResponses.ServiceResponse;
+using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
 using EDeals.Core.Infrastructure.Identity.Repository;
 using EDeals.Core.Infrastructure.Shared.ExecutionContext;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EDeals.Core.Infrastructure.Services.UserServices
 {
@@ -16,14 +18,17 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
         private readonly ICustomExecutionContext _executionContext; 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly AppDbContext _context;
 
-        public UserService(ICustomExecutionContext executionContext, 
+        public UserService(ICustomExecutionContext executionContext,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            AppDbContext context)
         {
             _executionContext = executionContext;
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         public async Task<ResultResponse<UserInfoResponse>> GetUserInfo()
@@ -71,6 +76,21 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
             }
 
             return result.ToApplicationResult();
+        }
+
+        public async Task<ResultResponse<List<UserInfoResponse>>> GetUsers()
+        {
+            return Ok(await _context.Users.Select(user => new UserInfoResponse
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                IsEmailVerified = user.EmailConfirmed,
+                IsPhoneNumberVerified = user.PhoneNumberConfirmed,
+                PhoneNumber = user.PhoneNumber,
+            })
+            .ToListAsync());
         }
     }
 }

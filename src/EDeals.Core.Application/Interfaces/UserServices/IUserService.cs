@@ -7,5 +7,6 @@ namespace EDeals.Core.Application.Interfaces.UserServices
     {
         Task<ResultResponse<UserInfoResponse>> GetUserInfo();
         Task<ResultResponse> DeleteUserAsync();
+        Task<ResultResponse<List<UserInfoResponse>>> GetUsers();
     }
 }

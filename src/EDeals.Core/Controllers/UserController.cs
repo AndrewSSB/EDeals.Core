@@ -1,4 +1,5 @@
 ﻿using EDeals.Core.API.Extensions;
+using EDeals.Core.Application.Interfaces.UserServices;
 using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Application.User.Commands.DeleteUser;
 using EDeals.Core.Application.User.Queries.UserInfo;
@@ -13,10 +14,12 @@ namespace EDeals.Core.API.Controllers
     public class UserController : Controller
     {
         private readonly IMediator _mediator;
+        private readonly IUserService _userService;
 
-        public UserController(IMediator mediator)
+        public UserController(IMediator mediator, IUserService userService)
         {
             _mediator = mediator;
+            _userService = userService;
         }
 
         [HttpGet("info")]
@@ -39,6 +42,13 @@ namespace EDeals.Core.API.Controllers
             var command = new DeleteUserCommand();
 
             return ControllerExtension.Map(await _mediator.Send(command));
+        }
+
+        [HttpGet("all")]
+        [Produces("application/json")]
+        public async Task<ActionResult<List<UserInfoResponse>>> GetUsers()
+        {
+            return ControllerExtension.Map(await _userService.GetUsers());
         }
     }
 }
