@@ -49,6 +49,8 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
             {
                 var webRootPath = Path.Combine(basePath, "wwwroot", filename);
 
+                _logger.LogInformation("Base path {} - webRootPath {}", basePath, webRootPath);
+
                 var templateSupport = await File.ReadAllTextAsync(webRootPath, cancellationToken);
 
                 return templateSupport;
