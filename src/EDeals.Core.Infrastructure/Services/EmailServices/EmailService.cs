@@ -49,7 +49,7 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
             {
                 var webRootPath = Path.Combine(basePath, "wwwroot", filename);
 
-                _logger.LogInformation("Base path {} - webRootPath {}", basePath, webRootPath);
+                _logger.LogInformation("Base path {basePath} - webRootPath {webRootPath}", basePath, webRootPath);
 
                 var templateSupport = await File.ReadAllTextAsync(webRootPath, cancellationToken);
 
