@@ -21,7 +21,7 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
 
         public async Task SendVerificationEmail(string to, string name, string token, CancellationToken cancellationToken)
         {
-            var filename = "EmailTemplates\\VerificationEmail.html";
+            var filename = "wwwroot/EmailTemplates/VerificationEmail.html";
 
             var template = await LoadTemplate(filename, cancellationToken);
 
@@ -38,20 +38,20 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
 
         private async Task<string?> LoadTemplate(string filename, CancellationToken cancellationToken = default)
         {
-            var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            
-            if (string.IsNullOrEmpty(basePath))
-            {
-                return null;
-            }
+            //var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            //if (string.IsNullOrEmpty(basePath))
+            //{
+            //    return null;
+            //}
 
             try
             {
-                var webRootPath = Path.Combine(basePath, "wwwroot", filename);
+                //var webRootPath = Path.Combine(basePath, "wwwroot", filename);
 
-                _logger.LogInformation("Base path {basePath} - webRootPath {webRootPath}", basePath, webRootPath);
+                _logger.LogInformation("File path {filename}", filename);
 
-                var templateSupport = await File.ReadAllTextAsync(webRootPath, cancellationToken);
+                var templateSupport = await File.ReadAllTextAsync(filename, cancellationToken);
 
                 return templateSupport;
             }

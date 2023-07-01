@@ -77,6 +77,8 @@ try
 
     app.MapControllers();
 
+    app.UseStaticFiles();
+
     app.Run();
 }
 catch (Exception ex) when (ex is not OperationCanceledException && !ex.GetType().Name.Contains("StopTheHostException") && !ex.GetType().Name.Contains("HostAbortedException"))
