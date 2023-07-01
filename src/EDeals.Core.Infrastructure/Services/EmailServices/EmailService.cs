@@ -30,7 +30,7 @@ namespace EDeals.Core.Infrastructure.Services.EmailServices
             template = template
                 .Replace("{name}", name)
                 .Replace("{image_url}", _appSettings.LogoUrl)
-                .Replace("{confirmation_link}", $"https://{_appSettings.BaseUrl}/api/authentication/confirm-email/{token}");
+                .Replace("{confirmation_link}", $"{_appSettings.ApiProtocol}://{_appSettings.ApplicationUrl}/api/authentication/confirm-email/{token}");
 
             await _sendinBlueService.SendEmailUsingApi(to, "Verification code", template);
             //await _sendinBlueService.SendEmailUsingSmtp(to, "Verification code", template);
