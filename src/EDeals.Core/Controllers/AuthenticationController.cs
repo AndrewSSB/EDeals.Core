@@ -6,6 +6,7 @@ using EDeals.Core.Application.Authentication.Commands.Logout;
 using EDeals.Core.Application.Authentication.Commands.Register;
 using EDeals.Core.Application.Authentication.Commands.SendCode;
 using EDeals.Core.Application.Authentication.Commands.SendToken;
+using EDeals.Core.Application.Models;
 using EDeals.Core.Application.Models.Authentication.Login;
 using EDeals.Core.Application.Models.Authentication.Register;
 using MediatR;
@@ -95,13 +96,13 @@ namespace EDeals.Core.API.Controllers
             return ControllerExtension.Map(await _mediator.Send(command));
         }
 
-        [HttpPost("confirm-email/{token}")]
+        [HttpPost("confirm-email")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult> ConfirmEmail(string token)
+        public async Task<ActionResult> ConfirmEmail(ConfirmEmail model)
         {
-            var command = new ConfirmEmailCommand(token);
+            var command = new ConfirmEmailCommand(model.Token);
 
             return ControllerExtension.Map(await _mediator.Send(command));
         }
