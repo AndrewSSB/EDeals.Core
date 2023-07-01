@@ -189,7 +189,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
         public async Task<ResultResponse> SendEmailToken()
         {
-            var userId = new Guid();
+            var userId = _executionContext.UserId;
 
             var user = await GetUser(userId);
 
@@ -213,7 +213,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             
             // TODO: Keep the credits for demo purpose
-            //await _emailService.SendVerificationEmail(user.Email, user.FirstName, confirmationToken);
+            await _emailService.SendVerificationEmail(user.Email, user.FirstName, confirmationToken);
 
             user.ResendTokenAvailableAfter = DateTime.UtcNow.AddMinutes(1);
             await _context.SaveChangesAsync();
@@ -223,7 +223,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
         public async Task<ResultResponse> ConfirmUserEmail(string token)
         {
-            var userId = new Guid();
+            var userId = _executionContext.UserId;
 
             var user = await GetUser(userId);
 
@@ -254,7 +254,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
         public async Task<ResultResponse> SendPhoneCode()
         {
-            var userId = new Guid();
+            var userId = _executionContext.UserId;
 
             var user = await GetUser(userId);
 
@@ -279,7 +279,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
             user.ResendCodeAvailableAfter = DateTime.UtcNow.AddMinutes(1);
 
             // TODO: Keep the credits for demo purpose
-            //await _smsService.SendSmsNotification(user.PhoneNumber, user.DigitCode);
+            await _smsService.SendSmsNotification(user.PhoneNumber, user.DigitCode);
 
             await _context.SaveChangesAsync();
 
@@ -288,7 +288,7 @@ namespace EDeals.Core.Infrastructure.Identity.Repository
 
         public async Task<ResultResponse> ConfirmUserPhone(string digitCode)
         {
-            var userId = new Guid();
+            var userId = _executionContext.UserId;
 
             var user = await GetUser(userId);
 

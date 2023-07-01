@@ -2,13 +2,13 @@
 {
     public static class GenericMessages
     {
-        public const string GenericMessage = "Something went wrong, please try again";
-        public const string UserDoesNotExists = "User does not exists";
+        public const string GenericMessage = "Ceva nu a mers, te rog incearca inca odata";
+        public const string UserDoesNotExists = "Utilizatorul nu exista";
         public const string InternalError = "Internal error";
 
         // Authentication
-        public const string DigitCodeTimeout = "You need to wait 1 minute to get another digit code";
-        public const string InvalidDigitCode = "Invalid digit code";
-        public const string AlreadyConfirmed = "Phone number / email was already confirmed";
+        public const string DigitCodeTimeout = "Trebuie sa astepti un minut";
+        public const string InvalidDigitCode = "Codul introdus este invalid";
+        public const string AlreadyConfirmed = "Numarul de telefon / emailul au fost deja confirmate";
     }
 }
