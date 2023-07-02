@@ -1,5 +1,6 @@
 ﻿using EDeals.Core.API.Extensions;
 using EDeals.Core.Application.Interfaces.UserServices;
+using EDeals.Core.Application.Models;
 using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Application.User.Commands.DeleteUser;
 using EDeals.Core.Application.User.Queries.UserInfo;
@@ -49,6 +50,13 @@ namespace EDeals.Core.API.Controllers
         public async Task<ActionResult<List<UserInfoResponse>>> GetUsers([FromQuery] string? userName)
         {
             return ControllerExtension.Map(await _userService.GetUsers(userName));
+        }
+        
+        [HttpPut("")]
+        [Produces("application/json")]
+        public async Task<ActionResult<List<UserInfoResponse>>> UpdateUserInfo(UpdateUserModel model)
+        {
+            return ControllerExtension.Map(await _userService.UpdateUser(model, HttpContext.Request.Headers.Authorization));
         }
     }
 }

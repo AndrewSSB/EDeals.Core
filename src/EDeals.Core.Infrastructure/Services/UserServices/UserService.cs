@@ -1,4 +1,6 @@
 ﻿using EDeals.Core.Application.Interfaces.UserServices;
+using EDeals.Core.Application.Models;
+using EDeals.Core.Application.Models.Authentication;
 using EDeals.Core.Application.Models.UserProfile;
 using EDeals.Core.Domain.Common.ErrorMessages;
 using EDeals.Core.Domain.Common.GenericResponses.BaseResponses;
@@ -7,9 +9,15 @@ using EDeals.Core.Infrastructure.Context;
 using EDeals.Core.Infrastructure.Identity.Auth;
 using EDeals.Core.Infrastructure.Identity.Extensions;
 using EDeals.Core.Infrastructure.Identity.Repository;
+using EDeals.Core.Infrastructure.Settings;
 using EDeals.Core.Infrastructure.Shared.ExecutionContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace EDeals.Core.Infrastructure.Services.UserServices
 {
@@ -19,16 +27,23 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly AppDbContext _context;
+        private readonly HttpClient _client;
+        private readonly ApplicationSettings _appSettings;
+
 
         public UserService(ICustomExecutionContext executionContext,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            AppDbContext context)
+            AppDbContext context,
+            IHttpClientFactory httpClientFactory, 
+            IOptions<ApplicationSettings> appSettings)
         {
             _executionContext = executionContext;
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _client = httpClientFactory.CreateClient();
+            _appSettings = appSettings.Value;
         }
 
         public async Task<ResultResponse<UserInfoResponse>> GetUserInfo()
@@ -78,6 +93,48 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
             return result.ToApplicationResult();
         }
 
+        public async Task<ResultResponse> UpdateUser(UpdateUserModel model, string token)
+        {
+            var user = await _userManager.FindByIdAsync(_executionContext.UserId.ToString());
+
+            if (user == null)
+            {
+                return BadRequest(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
+            }
+
+            if (!string.IsNullOrEmpty(model.FirstName))
+            {
+                user.FirstName = model.FirstName;
+            }
+            
+            if (!string.IsNullOrEmpty(model.LastName))
+            {
+                user.LastName = model.LastName;
+            }
+            
+            if (!string.IsNullOrEmpty(model.Email))
+            {
+                user.Email = model.Email;
+                user.EmailConfirmed = false;
+            }
+            
+            if (!string.IsNullOrEmpty(model.PhoneNumber))
+            {
+                user.PhoneNumber = model.PhoneNumber;
+                user.PhoneNumberConfirmed = false;
+            }
+            
+            if (!string.IsNullOrEmpty(model.Username))
+            {
+                user.UserName = model.Username;
+            }
+
+            await _context.SaveChangesAsync();
+
+            SendDataToCatalog(model, token);
+            return Ok();
+        }
+
         public async Task<ResultResponse<List<UserInfoResponse>>> GetUsers(string username)
         {
             var users = _context.Users.Where(x => x.Id != _executionContext.UserId);
@@ -101,6 +158,22 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
             .ToListAsync();
 
             return Ok(response);
+        }
+
+        private async Task SendDataToCatalog(UpdateUserModel model, string jwtToken)
+        {
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, jwtToken);
+
+            var modelJson = JsonConvert.SerializeObject(model);
+
+            HttpContent request = new StringContent(modelJson, Encoding.UTF8, "application/json");
+
+            var response = await _client.PutAsync($"{_appSettings.ApiProtocol}://{_appSettings.CatalogBaseUrl}/api/userinfo", request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                //....
+            }
         }
     }
 }
