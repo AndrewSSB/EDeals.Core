@@ -52,7 +52,7 @@ namespace EDeals.Core.API.Controllers
             return ControllerExtension.Map(await _userService.GetUsers(userName));
         }
         
-        [HttpPut("")]
+        [HttpPut()]
         [Produces("application/json")]
         public async Task<ActionResult<List<UserInfoResponse>>> UpdateUserInfo(UpdateUserModel model)
         {

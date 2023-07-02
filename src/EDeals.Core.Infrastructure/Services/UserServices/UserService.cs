@@ -80,7 +80,7 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
                 return BadRequest(new ResponseError(ErrorCodes.UserDoesNotExists, ResponseErrorSeverity.Error, GenericMessages.UserDoesNotExists));
             }
 
-            user.UserName += $"_{DateTime.UtcNow}";
+            user.UserName += DateTime.UtcNow.ToString("ZIddLUNAMMANyyyy");
             user.IsDeleted = true;
 
             var result = await _userManager.UpdateAsync(user);
