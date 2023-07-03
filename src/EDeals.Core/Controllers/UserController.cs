@@ -58,5 +58,18 @@ namespace EDeals.Core.API.Controllers
         {
             return ControllerExtension.Map(await _userService.UpdateUser(model, HttpContext.Request.Headers.Authorization));
         }
+        
+        [HttpPost("block/{userId}")]
+        [Produces("application/json")]
+        public async Task<ActionResult> BlockUser(Guid userId)
+        {
+            return ControllerExtension.Map(await _userService.BlockUser(userId));
+        }
+        [HttpPost("unblock/{userId}")]
+        [Produces("application/json")]
+        public async Task<ActionResult> UnblockUser(Guid userId)
+        {
+            return ControllerExtension.Map(await _userService.UnBlockUser(userId));
+        }
     }
 }

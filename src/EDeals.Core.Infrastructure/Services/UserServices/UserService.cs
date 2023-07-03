@@ -66,6 +66,7 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
                 IsEmailVerified = user.EmailConfirmed,
                 IsPhoneNumberVerified = user.PhoneNumberConfirmed,
                 PhoneNumber = user.PhoneNumber,
+                UserId = userId
             });
         }
 
@@ -91,6 +92,32 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
             }
 
             return result.ToApplicationResult();
+        }
+
+        public async Task<ResultResponse> BlockUser(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user != null)
+            {
+                user.IsDeleted = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+        
+        public async Task<ResultResponse> UnBlockUser(Guid userId)
+        {
+            var user = await _context.Users.IgnoreQueryFilters().Where(x => x.Id == userId).FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                user.IsDeleted = false;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
         }
 
         public async Task<ResultResponse> UpdateUser(UpdateUserModel model, string token)
@@ -154,6 +181,7 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
                 IsEmailVerified = user.EmailConfirmed,
                 IsPhoneNumberVerified = user.PhoneNumberConfirmed,
                 PhoneNumber = user.PhoneNumber,
+                UserId = user.Id,
             })
             .ToListAsync();
 

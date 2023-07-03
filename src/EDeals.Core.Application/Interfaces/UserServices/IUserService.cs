@@ -10,5 +10,7 @@ namespace EDeals.Core.Application.Interfaces.UserServices
         Task<ResultResponse> DeleteUserAsync();
         Task<ResultResponse<List<UserInfoResponse>>> GetUsers(string username);
         Task<ResultResponse> UpdateUser(UpdateUserModel model, string token);
+        Task<ResultResponse> BlockUser(Guid userId);
+        Task<ResultResponse> UnBlockUser(Guid userId);
     }
 }
