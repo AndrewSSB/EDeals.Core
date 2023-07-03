@@ -52,6 +52,13 @@ namespace EDeals.Core.API.Controllers
             return ControllerExtension.Map(await _userService.GetUsers(userName));
         }
         
+        [HttpGet("admin-all")]
+        [Produces("application/json")]
+        public async Task<ActionResult<List<UserInfoResponse>>> GetUsersAdmin()
+        {
+            return ControllerExtension.Map(await _userService.GetUsersAdmin());
+        }
+        
         [HttpPut()]
         [Produces("application/json")]
         public async Task<ActionResult<List<UserInfoResponse>>> UpdateUserInfo(UpdateUserModel model)

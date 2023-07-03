@@ -12,5 +12,6 @@ namespace EDeals.Core.Application.Interfaces.UserServices
         Task<ResultResponse> UpdateUser(UpdateUserModel model, string token);
         Task<ResultResponse> BlockUser(Guid userId);
         Task<ResultResponse> UnBlockUser(Guid userId);
+        Task<ResultResponse<List<UserInfoResponse>>> GetUsersAdmin();
     }
 }

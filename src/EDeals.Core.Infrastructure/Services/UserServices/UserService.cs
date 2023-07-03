@@ -187,6 +187,26 @@ namespace EDeals.Core.Infrastructure.Services.UserServices
 
             return Ok(response);
         }
+        
+        public async Task<ResultResponse<List<UserInfoResponse>>> GetUsersAdmin()
+        {
+            var users = _context.Users.IgnoreQueryFilters().Where(x => x.Id != _executionContext.UserId);
+                      
+            var response = await users.Select(user => new UserInfoResponse
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                IsEmailVerified = user.EmailConfirmed,
+                IsPhoneNumberVerified = user.PhoneNumberConfirmed,
+                PhoneNumber = user.PhoneNumber,
+                UserId = user.Id,
+            })
+            .ToListAsync();
+
+            return Ok(response);
+        }
 
         private async Task SendDataToCatalog(UpdateUserModel model, string jwtToken)
         {
